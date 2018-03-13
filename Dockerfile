@@ -4,8 +4,6 @@ RUN apk --update add postgresql-client \
     && \
     rm -rf /var/cache/apk/* \
     && \
-    addgroup -S postgres \
-    && \
     adduser -D -G postgres -s /bin/bash -h /home/postgres postgres
 
 USER postgres
