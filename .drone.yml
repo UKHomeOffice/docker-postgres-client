@@ -17,7 +17,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - docker login -u="ukhomeofficedigital+drt_quay" -p=$${DOCKER_PASSWORD} quay.io
+      - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
       - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_COMMIT_SHA}
       - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:latest
       - docker push quay.io/ukhomeofficedigital/postgres-client:$${DRONE_COMMIT_SHA}
@@ -32,7 +32,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - docker login -u="ukhomeofficedigital+drt_quay" -p=$${DOCKER_PASSWORD} quay.io
+      - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
       - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_TAG}
       - docker push quay.io/ukhomeofficedigital/postgres-client:$${DRONE_TAG}
     when:
