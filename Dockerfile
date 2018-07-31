@@ -4,4 +4,4 @@ RUN apk --update add postgresql-client \
     && \
     rm -rf /var/cache/apk/*
 
-USER postgres
+USER 70
