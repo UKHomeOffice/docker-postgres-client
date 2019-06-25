@@ -9,4 +9,7 @@ RUN apk --no-cache update && \
     pip --no-cache-dir install awscli && \
     rm -rf /var/cache/apk/*
 
+ADD scripts /opt/scripts
+# RUN chmod +x -R /opt/scripts
+
 USER 70
