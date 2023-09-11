@@ -1,21 +1,31 @@
 ---
-pipeline:
-  build_image:
+kind: pipeline
+name: postgres-client
+type: kubernetes
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: build_image
+    pull: if-not-exists
     image: docker:17.09.1
     environment:
-      - DOCKER_HOST=tcp://172.17.0.1:2375
+      DOCKER_HOST: tcp://172.17.0.1:2375
     commands:
       - docker build --build-arg DRONE_REPO_LINK=$${DRONE_REPO_LINK} --build-arg DRONE_REMOTE_URL=$${DRONE_REMOTE_URL} --build-arg DRONE_COMMIT_REF=$${DRONE_COMMIT_REF} --build-arg DRONE_COMMIT_SHA=$${DRONE_COMMIT_SHA} --build-arg DRONE_BUILD_CREATED=$${DRONE_BUILD_CREATED} --build-arg DRONE_BUILD_NUMBER=$${DRONE_BUILD_NUMBER} -t postgres-client .
     when:
       branch:
       event: [tag,push]
 
-  image_to_quay:
-    image: docker:17.09.1
+  - image_to_quay:
+    pull: if-not-exists
+    image: docker:24.0.6
     secrets:
       - docker_password
     environment:
-      - DOCKER_HOST=tcp://172.17.0.1:2375
+      DOCKER_HOST: tcp://172.17.0.1:2375
     commands:
       - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
       - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_COMMIT_SHA}
@@ -25,12 +35,13 @@ pipeline:
     when:
       event: [tag,push]
 
-  tag_to_quay:
-    image: docker:17.09.1
+  - tag_to_quay:
+    pull: if-not-exists
+    image: docker:24.0.6
     secrets:
       - docker_password
     environment:
-      - DOCKER_HOST=tcp://172.17.0.1:2375
+      DOCKER_HOST: tcp://172.17.0.1:2375
     commands:
       - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
       - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_TAG}
