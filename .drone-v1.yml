@@ -8,19 +8,17 @@ platform:
   arch: amd64
 
 steps:
-  - name: Build docker
+  - name: Build docker image
     pull: if-not-exists
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-#    environment:
-#      DOCKER_HOST: tcp://172.17.0.1:2375
     commands:
-      - n=0; while [ "$n" -lt 60 ] && [ ! -e /var/run/docker.sock ]; do n=$(( n + 1 )); sleep 1; done
+      - /usr/local/bin/wait
       - docker build --build-arg DRONE_REPO_LINK=$${DRONE_REPO_LINK} --build-arg DRONE_REMOTE_URL=$${DRONE_REMOTE_URL} --build-arg DRONE_COMMIT_REF=$${DRONE_COMMIT_REF} --build-arg DRONE_COMMIT_SHA=$${DRONE_COMMIT_SHA} --build-arg DRONE_BUILD_CREATED=$${DRONE_BUILD_CREATED} --build-arg DRONE_BUILD_NUMBER=$${DRONE_BUILD_NUMBER} -t postgres-client .
     when:
       branch:
-      event: [tag,push]
+      event: [ tag, push ]
 
-  - name: Publish app
+  - name: Publish docker image
     image: plugins/ecr
     environment:
       AWS_REGION: eu-west-2
@@ -36,39 +34,8 @@ steps:
       event:
         - push
     depends_on:
-      - Build docker
+      - Build docker image
 
 services:
   - name: Docker in Docker
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-
-
-#  - image_to_quay:
-#    pull: if-not-exists
-#    image: docker:24.0.6
-#    secrets:
-#      - docker_password
-#    environment:
-#      DOCKER_HOST: tcp://172.17.0.1:2375
-#    commands:
-#      - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
-#      - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_COMMIT_SHA}
-#      - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:latest
-#      - docker push quay.io/ukhomeofficedigital/postgres-client:$${DRONE_COMMIT_SHA}
-#      - docker push quay.io/ukhomeofficedigital/postgres-client:latest
-#    when:
-#      event: [tag,push]
-
-#  - tag_to_quay:
-#    pull: if-not-exists
-#    image: docker:24.0.6
-#    secrets:
-#      - docker_password
-#    environment:
-#      DOCKER_HOST: tcp://172.17.0.1:2375
-#    commands:
-#      - docker login -u="ukhomeofficedigital+postgres_client" -p=$${DOCKER_PASSWORD} quay.io
-#      - docker tag postgres-client quay.io/ukhomeofficedigital/postgres-client:$${DRONE_TAG}
-#      - docker push quay.io/ukhomeofficedigital/postgres-client:$${DRONE_TAG}
-#    when:
-#      event: [tag]
