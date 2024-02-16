@@ -8,7 +8,7 @@ platform:
   arch: amd64
 
 steps:
-  - name: Build docker image
+  - name: Build docker
     pull: if-not-exists
     image: docker:17.09.1
     environment:
@@ -35,7 +35,7 @@ steps:
       event:
         - push
     depends_on:
-      - Build docker image
+      - Build docker
 
 #  - image_to_quay:
 #    pull: if-not-exists
