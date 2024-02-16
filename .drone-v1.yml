@@ -1,0 +1,41 @@
+---
+kind: pipeline
+name: postgres-client
+type: kubernetes
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: Build docker image
+    pull: if-not-exists
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+    commands:
+      - /usr/local/bin/wait
+      - docker build --build-arg DRONE_REPO_LINK=$${DRONE_REPO_LINK} --build-arg DRONE_REMOTE_URL=$${DRONE_REMOTE_URL} --build-arg DRONE_COMMIT_REF=$${DRONE_COMMIT_REF} --build-arg DRONE_COMMIT_SHA=$${DRONE_COMMIT_SHA} --build-arg DRONE_BUILD_CREATED=$${DRONE_BUILD_CREATED} --build-arg DRONE_BUILD_NUMBER=$${DRONE_BUILD_NUMBER} -t postgres-client .
+    when:
+      branch:
+      event: [ tag, push ]
+
+  - name: Publish docker image
+    image: plugins/ecr
+    environment:
+      AWS_REGION: eu-west-2
+    settings:
+      access_key: AKIAU6OMSVAPT4KGR2YC
+      secret_key:
+        from_secret: aws_secret_access_key
+      repo: drt/docker-postgresql-client
+      registry: 340268328991.dkr.ecr.eu-west-2.amazonaws.com
+      tags:
+        - B${DRONE_BUILD_NUMBER}
+    when:
+      event:
+        - push
+    depends_on:
+      - Build docker image
+
+services:
+  - name: Docker in Docker
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
